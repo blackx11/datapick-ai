@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=480, initial-scale=1.0">
+  <title>DataPick AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">D</span>
+        <span class="logo-text">DataPick <span class="ai-badge">AI</span></span>
+      </div>
+      <button id="settingsBtn" class="icon-btn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Usage indicator -->
+    <div class="usage-bar" id="usageBar">
+      <span id="usageText">Loading...</span>
+      <a href="#" id="upgradeLink" class="upgrade-link" style="display:none">Upgrade to Pro</a>
+    </div>
+
+    <!-- Main View -->
+    <div id="mainView">
+      <!-- Quick actions -->
+      <div class="quick-actions">
+        <button class="action-btn primary" id="autoExtractBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Auto Extract
+        </button>
+        <button class="action-btn" id="extractSelectionBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/>
+          </svg>
+          Selection
+        </button>
+      </div>
+
+      <!-- Custom instruction -->
+      <div class="instruction-section">
+        <label class="label">Or describe what to extract:</label>
+        <div class="input-row">
+          <textarea id="instructionInput" placeholder="e.g. Extract all product names and prices&#10;e.g. Get contact emails and phone numbers&#10;e.g. 提取所有公司名称和地址" rows="2"></textarea>
+          <button id="customExtractBtn" class="extract-btn" title="Extract">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Preset templates -->
+        <div class="presets">
+          <button class="preset-chip" data-instruction="Extract all contact information: names, emails, phone numbers, job titles">Contacts</button>
+          <button class="preset-chip" data-instruction="Extract all product names, prices, and descriptions">Products</button>
+          <button class="preset-chip" data-instruction="Extract all links with their text and URLs">Links</button>
+          <button class="preset-chip" data-instruction="Extract company names, addresses, and key information">Companies</button>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="loadingState" class="loading-state" style="display:none">
+        <div class="spinner"></div>
+        <span>AI is analyzing the page...</span>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsSection" class="results-section" style="display:none">
+        <div class="results-header">
+          <span id="resultCount" class="result-count"></span>
+          <div class="export-actions">
+            <button class="export-btn" id="copyBtn" title="Copy to clipboard">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copy
+            </button>
+            <button class="export-btn" id="csvBtn" title="Download CSV">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              CSV
+            </button>
+            <button class="export-btn" id="jsonBtn" title="Download JSON">JSON</button>
+          </div>
+        </div>
+        <div id="resultsTable" class="results-table"></div>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="error-state" style="display:none">
+        <span id="errorMessage"></span>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settingsView" style="display:none">
+      <div class="settings-header">
+        <button id="backBtn" class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
+        <h3>Settings</h3>
+      </div>
+      <div class="settings-body">
+        <!-- AI Provider Selection -->
+        <div class="setting-item">
+          <label class="label">AI Service Provider</label>
+          <select id="providerSelect" class="text-input">
+            <option value="deepseek">DeepSeek (推荐, 国内直连)</option>
+            <option value="siliconflow">SiliconFlow 硅基流动</option>
+            <option value="zhipu">智谱 AI (GLM)</option>
+            <option value="openai">OpenAI</option>
+            <option value="custom">自定义 (OpenAI 兼容)</option>
+          </select>
+          <p class="hint" id="providerNote">国内可直接访问，价格极低，注册即送 500 万 token</p>
+        </div>
+
+        <!-- API Key -->
+        <div class="setting-item">
+          <label class="label">API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="sk-..." class="text-input">
+          <p class="hint">Your key is stored locally. <a href="https://platform.deepseek.com/api_keys" target="_blank" id="getKeyLink">Get a key</a></p>
+        </div>
+
+        <!-- Custom endpoint fields (hidden by default) -->
+        <div id="customFields" style="display:none">
+          <div class="setting-item">
+            <label class="label">API Base URL</label>
+            <input type="text" id="customApiBase" placeholder="https://your-api.com/v1/chat/completions" class="text-input">
+          </div>
+          <div class="setting-item">
+            <label class="label">Model Name</label>
+            <input type="text" id="customModel" placeholder="gpt-4o-mini" class="text-input">
+          </div>
+        </div>
+
+        <!-- Quick setup guide -->
+        <div class="setup-guide" id="setupGuide">
+          <div class="guide-title">Quick Setup</div>
+          <div class="guide-steps" id="guideSteps">
+            <div class="guide-step">1. Visit <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a></div>
+            <div class="guide-step">2. Register with phone number (支持手机号注册)</div>
+            <div class="guide-step">3. Go to API Keys page, create a new key</div>
+            <div class="guide-step">4. Paste the key above and save</div>
+          </div>
+        </div>
+
+        <button id="saveSettingsBtn" class="action-btn primary" style="width:100%;margin-top:12px">Save Settings</button>
+
+        <!-- Test connection button -->
+        <button id="testConnectionBtn" class="action-btn" style="width:100%;margin-top:8px">Test Connection</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span class="footer-text">DataPick AI v1.1 — Extract smarter, not harder</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
